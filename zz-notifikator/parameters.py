@@ -14,6 +14,8 @@ class Parameters:
     RECEIVER_MAIL = config['general']['receiver_email']
     APP_PASSWORD = config['general']['app_password']
 
+    DB_PWD = config['general']['db_pwd']
+
     NORMAL = 0
     RICH = 1
     FULL = 2

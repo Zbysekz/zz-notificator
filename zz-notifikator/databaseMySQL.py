@@ -52,7 +52,7 @@ class cMySQL:
         return mysql.connector.connect(
             host="localhost",
             user="mainScript",
-            password="mainScript",
+            password=Parameters.DB_PWD,
             database="db1",
             connection_timeout=10
         )
