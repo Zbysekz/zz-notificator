@@ -1,0 +1,4 @@
+config.ini
+*.swp
+.idea
+__pycache__
