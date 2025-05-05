@@ -6,12 +6,12 @@ from parameters import Parameters
 from databaseMySQL import cMySQL
 from logger import Logger
 
-
+logger = Logger("main")
 while True:
     try:
         mysql = cMySQL()
         queue = mysql.getQueue()
-        if len(queue) > 0:
+        if queue and len(queue) > 0:
             # Create SMTP session
             with smtplib.SMTP("smtp.gmail.com", 587) as server:
                 server.starttls()  # Secure the connection
@@ -30,11 +30,12 @@ while True:
 
                         text = message.as_string()
                         server.sendmail(Parameters.SENDER_MAIL, notification["receiver"], text)
-                        results.append([{"result": "ok", "id": notification["id"]}])
+                        results.append({"result": "ok", "id": notification["id"]})
                     except Exception as e:
                         results.append([{"result":"error", "error_type": type(e), "error_message":repr(e),"id": notification["id"]}])
                 mysql.reportSentResult(results)
 
-            Logger(f"Sent {len(queue)} notification emails.")
+            logger.log(f"Sent {len(queue)} notification emails.")
     except Exception as e:
-        time.sleep(60)
+        logger.log(f"Exception in main thread: {repr(e)}")
+    time.sleep(30)

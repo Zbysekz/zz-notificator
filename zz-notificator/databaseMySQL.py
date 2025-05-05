@@ -28,7 +28,7 @@ class cMySQL:
     def __init__(self):
         self._persistentConnection = False
         self.databaseCon = None
-        self.logger = Logger("databaseMySQL", verbosity=Parameters.VERBOSITY)
+        self.logger = Logger("databaseMySQL", verbosity=Parameters.verbosity)
 
     def getConnection(self):
         if self._persistentConnection:
@@ -69,14 +69,12 @@ class cMySQL:
             sql = "SELECT id, receiver, subject, message FROM notificator_queue WHERE state='CREATED'"
             cursor.execute(sql)
 
-            result = cursor.fetchall()
+            data = cursor.fetchall()
 
-            result = {}
-            for x in result:
-                result["id"] = x[0]
-                result["receiver"] = x[1]
-                result["subject"] = x[2]
-                result["message"] = x[3]
+            result_arr = []
+            for x in data:
+                result = {"id": x[0], "receiver": x[1], "subject": x[2], "message": x[3]}
+                result_arr.append(result)
 
             cursor.close()
             self.closeDBIfNeeded(db)
@@ -86,11 +84,11 @@ class cMySQL:
             self.logger.log_exception(e)
             return None
 
-        return result
+        return result_arr
 
     def reportSentResult(self, result):
 
-        ok_ids = [x["id"] for x in result if x["result"] == "ok"]
+        ok_ids = [str(x["id"]) for x in result if x["result"] == "ok"]
 
         if len(ok_ids)>0:
             try:
@@ -98,7 +96,7 @@ class cMySQL:
 
                 sql = f"UPDATE notificator_queue SET state='SENT' WHERE id in ({','.join(ok_ids)})"
                 cursor.execute(sql)
-
+                db.commit()
                 cursor.close()
                 self.closeDBIfNeeded(db)
 
@@ -110,7 +108,7 @@ class cMySQL:
             try:
                 db, cursor = self.getConnection()
 
-                sql = f"UPDATE notificator_queue SET state='ERROR', error_type='{i['error_type']}', error_message='{i['error_message']}' WHERE id = {i['id']})"
+                sql = f"UPDATE notificator_queue SET state='ERROR', error_type='{i['error_type']}', error_message='{i['error_message']}' WHERE id = {str(i['id'])})"
 
                 cursor.execute(sql)
 
